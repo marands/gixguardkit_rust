@@ -1,0 +1,39 @@
+[package]
+name = "gix_guard_kit_rust"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name="gix_guard_kit"
+crate-type = ["staticlib", "cdylib"]
+path = "src/lib.rs"
+#test = true
+
+[[bin]]
+name="generator"
+path = "src/build.rs"
+doc = false
+
+
+[dependencies]
+cbindgen = { git = "https://github.com/mjhatamy/cbindgen", branch = "ref_fix" }
+#cbindgen = "0.20.0"
+libc = "0.2.112"
+rand = "0.8.4"
+
+[build-dependencies]
+cbindgen = { git = "https://github.com/mjhatamy/cbindgen", branch = "ref_fix" }
+#cbindgen = { version = "0.20.0", path = "../../../../mjhatamy/git_contrib_projects/cbindgen"}
+#cbindgen = "0.20.0"
+
+# standard crate data is left out
+[dev-dependencies]
+pretty_assertions = "1"
+
+
+# Android arm64
+[target.aarch64-linux-android]
+linker = "/opt/angle/third_party/android_ndk/build/core/toolchains/aarch64-linux-android-clang"
+
