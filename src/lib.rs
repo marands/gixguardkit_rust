@@ -88,7 +88,7 @@ pub extern "C" fn key_to_base64(
 }
 
 #[no_mangle]
-pub extern "C" fn hex_from_key(
+pub extern "C" fn key_from_hex(
     dst: *mut [u8; GXT_KEY_LEN],
     src: *const [c_char; GXT_KEY_LEN_HEX],
 ) -> GixTunnelErrorKind {

@@ -1,5 +1,5 @@
 
-language = "C++"
+language = "C"
 
 # Whether to include a comment with the version of cbindgen used to generate the file
 # default: false
