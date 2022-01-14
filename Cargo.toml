@@ -3,24 +3,36 @@ name = "gix_guard_kit_rust"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
 name="gix_guard_kit"
-crate-type = ["staticlib", "cdylib"]
+crate-type = ["staticlib", "cdylib" ]
+#crate-type = ["cdylib"]
+# cargo-features = ["strip"]
 path = "src/lib.rs"
-#test = true
 
-[[bin]]
-name="generator"
-path = "src/build.rs"
-doc = false
+[profile.dev]
+opt-level = 1
+
+[profile.test]
+opt-level = 1
+
+[profile.release]
+opt-level = "s"
+lto = "fat"
+debug = false
+codegen-units = 16
+
+#[[bin]]
+#name="generator"
+#path = "src/build.rs"
+#doc = false
 
 
 [dependencies]
-cbindgen = { git = "https://github.com/mjhatamy/cbindgen", branch = "ref_fix" }
+#cbindgen = { git = "https://github.com/mjhatamy/cbindgen", branch = "ref_fix" }
 #cbindgen = "0.20.0"
-libc = "0.2.112"
+#libc = "0.2.112"
 rand = "0.8.4"
 
 [build-dependencies]
@@ -32,8 +44,12 @@ cbindgen = { git = "https://github.com/mjhatamy/cbindgen", branch = "ref_fix" }
 [dev-dependencies]
 pretty_assertions = "1"
 
-
+#[target.aarch64-apple-darwin]
+#crate-type = [ "framework" ]
+#
+#[target.x86_64-apple-darwin]
+#crate-type = [ "framework" ]
 # Android arm64
-[target.aarch64-linux-android]
-linker = "/opt/angle/third_party/android_ndk/build/core/toolchains/aarch64-linux-android-clang"
+#[target.aarch64-linux-android]
+#linker = "/opt/angle/third_party/android_ndk/build/core/toolchains/aarch64-linux-android-clang"
 

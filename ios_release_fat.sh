@@ -1,0 +1,1 @@
+cargo lipo --targets aarch64-apple-ios,x86_64-apple-ios --release
