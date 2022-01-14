@@ -24,6 +24,15 @@ enum class GixTunnelErrorKind : uint32_t {
 
 extern "C" {
 
+void curve25519_shared_secret(uint8_t sharedSecret[GXT_KEY_LEN],
+                              const uint8_t privateKey[GXT_KEY_LEN],
+                              const uint8_t publicKey[GXT_KEY_LEN]);
+
+void curve25519_generate_private_key(uint8_t privateKey[GXT_KEY_LEN]);
+
+bool curve25519_derive_public_key(uint8_t publicKey[GXT_KEY_LEN],
+                                  const uint8_t privateKey[GXT_KEY_LEN]);
+
 GixTunnelErrorKind key_from_base64(uint8_t dst[GXT_KEY_LEN], const char src[GXT_KEY_LEN_BASE64]);
 
 GixTunnelErrorKind key_to_base64(char dst[GXT_KEY_LEN_BASE64], const uint8_t src[GXT_KEY_LEN]);

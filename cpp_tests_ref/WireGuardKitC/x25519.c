@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
-#include <CommonCrypto/CommonRandom.h>
+//#include <CommonCrypto/CommonRandom.h>
 
 #include "x25519.h"
 
@@ -117,7 +117,15 @@ static inline void invert(fe o, const fe i)
     memcpy(o, c, sizeof(fe));
 }
 
-static void curve25519_shared_secret(uint8_t shared_secret[32], const uint8_t private_key[32], const uint8_t public_key[32])
+void print_lines(fe b, const char *name) {
+    printf("%s: ", name);
+    for(int ii=0; ii < 16; ii++) {
+        printf(":%02x", b[ii]);
+    }
+    printf("\n");
+}
+
+void curve25519_shared_secret(uint8_t shared_secret[32], const uint8_t private_key[32], const uint8_t public_key[32])
 {
     static const fe a24 = { 0xdb41, 1 };
     uint8_t z[32];
@@ -132,7 +140,7 @@ static void curve25519_shared_secret(uint8_t shared_secret[32], const uint8_t pr
 
     unpack(x, public_key);
     memcpy(b, x, sizeof(b));
-
+    
     for (i = 254; i >= 0; --i) {
         r = (z[i >> 3] >> (i & 7)) & 1;
         cswap(a, b, (int)r);
@@ -172,7 +180,7 @@ void curve25519_derive_public_key(uint8_t public_key[32], const uint8_t private_
 
 void curve25519_generate_private_key(uint8_t private_key[32])
 {
-    assert(CCRandomGenerateBytes(private_key, 32) == kCCSuccess);
+    //assert(CCRandomGenerateBytes(private_key, 32) == kCCSuccess);
     private_key[31] = (private_key[31] & 127) | 64;
     private_key[0] &= 248;
 }

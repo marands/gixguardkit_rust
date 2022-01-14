@@ -15,8 +15,8 @@ set(WireGuardKitC_Files
         WireGuardKitC/key.c
         WireGuardKitC/key.h
         WireGuardKitC/WireGuardKitC.h
-#        WireGuardKitC/x25519.h
-#        WireGuardKitC/x25519.c
+        WireGuardKitC/x25519.h
+        WireGuardKitC/x25519.c
         )
 
 add_executable(${CMAKE_PROJECT_NAME} main.c

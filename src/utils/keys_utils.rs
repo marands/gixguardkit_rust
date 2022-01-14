@@ -1,37 +1,21 @@
 pub(crate) use crate::errors::*;
-
-pub const GXT_KEY_LEN: usize = 32;
-pub const GXT_KEY_LEN_BASE64: usize = 45;
-pub const GXT_KEY_LEN_HEX: usize = 65;
-
+pub(crate) use crate::utils::constants::*;
 
 #[allow(unused)]
 pub fn key_eq(l_val: Option<&Vec<u8>>, r_val: Option<&Vec<u8>>) -> bool {
-    let check_validity = | val: Option<&Vec<u8>> | {
-        match val {
-            Some(x) if x.len() < GXT_KEY_LEN - 1 => Some(x.clone()),
-            None => None,
-            _ => None,
-        }
-    };
-
     let mut acc = 0_i16;
-    if let (Some(l), Some(r)) = (check_validity(l_val), check_validity(r_val)) {
-
-        for i in 0..GXT_KEY_LEN-1 {
-            acc |= (l[i] ^ r[i]) as i16;
-            // #![feature(asm)]
-            // unsafe {
-            //     asm!()
-            // }
-            println!("acc: {} - l:{} - r: {}", acc, l[i], r[i]);
+    if let Some(l) = l_val {
+        if let Some(r) = r_val  {
+            if l.len() != GXT_KEY_LEN || r.len() != GXT_KEY_LEN {
+                return false;
+            }
+            for i in 0..GXT_KEY_LEN - 1 {
+                acc |= (l[i] ^ r[i]) as i16;
+            }
+            return (1 & ((acc - 1) >> 8)) == 1;
         }
-    } else {
-        return false;
     }
-
-    println!("acc: {}", acc);
-    return (1 & ((acc -1 ) >> 8)) == 1;
+    return false;
 }
 
 #[allow(unused)]
@@ -174,20 +158,21 @@ pub fn key_to_hex(key: Option<&Vec<u8>>) -> Result<Vec<u8>, GixTunnelErrorKind> 
     }
 }
 
+#[allow(unused)]
 pub fn key_from_hex(hex_str: Option<Vec<u8>>) -> Result<Vec<u8>, GixTunnelErrorKind> {
     match hex_str {
         Some(hex) if hex.len() == GXT_KEY_LEN_HEX - 1 => {
             let mut out = vec![0_u8; GXT_KEY_LEN];
-            let mut c1:i16;
-            let mut c2:i16;
-            let mut c_acc1:i16;
-            let mut c_acc2:i16;
-            let mut key_val:i16;
-            let mut c_num0_0:i16;
-            let mut c_num0_1:i16;
-            let mut c_alpha0_0:i16;
-            let mut c_alpha0_1:i16;
-            let mut ret:i16 = 0;
+            let mut c1: i16;
+            let mut c2: i16;
+            let mut c_acc1: i16;
+            let mut c_acc2: i16;
+            let mut key_val: i16;
+            let mut c_num0_0: i16;
+            let mut c_num0_1: i16;
+            let mut c_alpha0_0: i16;
+            let mut c_alpha0_1: i16;
+            let mut ret: i16 = 0;
 
             let calc_acc = |val: i16| match val {
                 48..=58 => val - 48,

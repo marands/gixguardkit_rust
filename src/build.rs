@@ -1,11 +1,9 @@
 extern crate cbindgen;
-
-//use std::env;
-
 mod errors;
 mod utils;
 
-use crate::utils::keys_utils::*;
+//
+//use crate::utils::keys_utils::*;
 
 fn main() {
     // let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
@@ -24,20 +22,39 @@ fn main() {
     //     0x3f, 0x3d, 0xd4, 0x5d, 0xa9, 0x7b, 0x4c, 0x3a, 0xa5, 0x13, 0xde, 0x48, 0x8c, 0x95, 0xec,
     //     0xf6, 0x42,
     // ];
-    let hex_key = "0037608c14e6cdcec5097045c600f93f3dd45da97b4c3aa513de488c95ecf642";
-    // let ppp: Vec<u8> = (0..hex_key.len())
-    //     .step_by(2)
-    //     .map(|i| u8::from_str_radix(&hex_key[i..i + 2], 16).expect("---") ).collect()
-    //     ;
-    // let ppp: Vec<u8> = hex_key.chars().map(|i| u8::from_str_radix(format!("{}", i).as_str(), 16).expect("Great") ).collect();
-    //     println!("ppp: {:?}", ppp);
-    let ppp = hex_key.chars().map(|f| f as u8).collect();
-    //let p = key_from_hex(Some( ppp ) );
-    let p = key_from_hex(Some(ppp));
-    match p {
-        Ok(result) => {
-            println!("Result: {:X?}", result);
-        }
-        Err(e) => print!("Failed. Error: {:?}", e),
+    //let hex_key = "0037608c14e6cdcec5097045c600f93f3dd45da97b4c3aa513de488c95ecf642";
+    // // let ppp: Vec<u8> = (0..hex_key.len())
+    // //     .step_by(2)
+    // //     .map(|i| u8::from_str_radix(&hex_key[i..i + 2], 16).expect("---") ).collect()
+    // //     ;
+    // // let ppp: Vec<u8> = hex_key.chars().map(|i| u8::from_str_radix(format!("{}", i).as_str(), 16).expect("Great") ).collect();
+    // //     println!("ppp: {:?}", ppp);
+    // let ppp = hex_key.chars().map(|f| f as u8).collect();
+    // //let p = key_from_hex(Some( ppp ) );
+    // let p = key_from_hex(Some(ppp));
+    // match p {
+    //     Ok(result) => {
+    //         println!("Result: {:X?}", result);
+    //     }
+    //     Err(e) => print!("Failed. Error: {:?}", e),
+    // }
+
+    let mut private_key = [0_u8; 32];
+    utils::x25519::curve25519_generate_private_key(&mut private_key);
+    println!("char: {:?}", private_key);
+
+    for b in 0..100 {
+        let c: i64 = (!(b - 1)) as i64;
+        let t: i64 = !(b as i64);
+        print!("b:{} - t:{} - c: {}\t\t", b, t, c);
     }
+    //let mut b: i32 = 10;
+    // let mut c: i64 = (!(b - 1) ) as i64;
+    // let mut t: i64 = !(b as i64);
+    let mut shared_secret = [0_u8; 32];
+    let private_key = [1_u8; 32];
+    let public_key = [1_u8; 32];
+    utils::x25519::curve25519_shared_secret(&mut shared_secret, private_key, public_key);
+
+    print!("\nshared_secret: {:x?}", shared_secret);
 }

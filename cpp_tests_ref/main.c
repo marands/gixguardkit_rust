@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "WireGuardKitC/key.h"
 #include "WireGuardKitC/x25519.h"
@@ -77,13 +80,94 @@ void make_key_from_base64_tests() {
 
 extern uint8_t test_print1();
 
+void print_named_lines(uint8_t *b, int total_len, const char *name) {
+    printf("%s: ", name);
+    for(int i=0; i < total_len; i++) {
+        printf("%#02x", b[i]);
+        if(i>0) printf(":");
+    }
+    printf("\n");
+}
+
+void print_rust_arr(uint8_t b[32], int total_len ) {
+    printf("[");
+    for(int i=0; i < total_len; i++) {
+        if(i>0 && i < total_len) printf(",");
+        printf("%#.02x", (unsigned int) b[i]);
+    }
+    printf("]");
+}
+
+void print_rust_arr_var(uint8_t b[16][32], int arr_size, const char *variableName) {
+    printf("%s: [\n", variableName);
+    for(int i=0; i < arr_size; i++) {
+        printf("\t");
+        print_rust_arr(b[i], 32);
+        if(i < arr_size) printf(",");
+        printf("\n");
+    }
+    printf("],\n");
+}
+
 int main() {
     printf("\"Hello, World!\"\n");
 
 //    make_key_from_base64_tests();
 //
-    printf("\n\nstarting next test data for key_to_hex :\n\n");
-    make_key_to_hex_and_inverse_tests();
+    // printf("\n\nstarting next test data for key_to_hex :\n\n");
+    // make_key_to_hex_and_inverse_tests();
+
+//static void curve25519_shared_secret(uint8_t shared_secret[32], const uint8_t private_key[32], const uint8_t public_key[32])
+    uint8_t shared_secret[32];
+    uint8_t private_key[32];
+    uint8_t public_key[32];
+
+    uint8_t shared_secret_arr[16][32];
+    uint8_t private_key_arr[16][32];
+    uint8_t public_key_arr[16][32];
+    uint8_t public_key_calc_arr[16][32];
+
+    for(int i=0; i < 16; i++) {
+        srand (time(NULL) + rand());
+
+        for(int j=0; j < 32; j++) {
+            private_key[j] = rand() % 255;
+            public_key[j] = rand() % 255;
+        }
+
+        memset(shared_secret, 0, 32);
+        curve25519_shared_secret(shared_secret, private_key, public_key);
+        print_rust_arr(shared_secret, 32);
+        printf("\n");
+
+        memcpy((*shared_secret_arr) + (i * (32 * sizeof(uint8_t))), shared_secret, 32 * sizeof(uint8_t));
+        memcpy(private_key_arr[i], private_key, 32 * sizeof(uint8_t));
+        memcpy(public_key_arr[i], public_key, 32 * sizeof(uint8_t));
+    }
+
+    print_rust_arr_var(private_key_arr, 16, "private_key_arr");
+    print_rust_arr_var(public_key_arr, 16, "public_key_arr");
+    print_rust_arr_var(shared_secret_arr, 16, "shared_secret_arr");
+
+    char public_key_out[32];
+    for(int i=0; i < 16; i++) {
+        curve25519_derive_public_key(public_key_out, private_key_arr[i]);
+        memcpy(public_key_calc_arr[i], public_key_out, 32 * sizeof(uint8_t));
+    }
+    print_rust_arr_var(public_key_calc_arr, 16, "public_key_calc_arr");
+    
+    curve25519_generate_private_key(public_key_out);
+    print_rust_arr(public_key_out, 32);
+    printf("\n");
+    //public_key_calc_arr
+
+    // curve25519_shared_secret(shared_secret, private_key, public_key);
+
+    // printf("shared_secret: ");
+    // for(int i=0; i < 32; i++) {
+    //     printf(":%02x", shared_secret[i]);
+    // }
+    // printf("\n");
 
     //test_print1();
     return 0;

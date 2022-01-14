@@ -5,7 +5,38 @@ pub use errors::GixTunnelErrorKind;
 use std::os::raw::c_char;
 
 use self::utils::keys_utils;
-use self::utils::keys_utils::{GXT_KEY_LEN, GXT_KEY_LEN_HEX, GXT_KEY_LEN_BASE64};
+use self::utils::constants::{GXT_KEY_LEN, GXT_KEY_LEN_BASE64, GXT_KEY_LEN_HEX};
+use self::utils::x25519;
+
+#[no_mangle]
+pub extern "C" fn curve25519_shared_secret(
+    shared_secret: *mut [u8; GXT_KEY_LEN],
+    private_key: *const [u8; GXT_KEY_LEN],
+    public_key: *const [u8; GXT_KEY_LEN],
+) {
+    let shared_secret_w: &mut [[u8; GXT_KEY_LEN]] = unsafe { std::slice::from_raw_parts_mut(shared_secret, GXT_KEY_LEN) };
+    let public_key_w = unsafe { std::slice::from_raw_parts(public_key, GXT_KEY_LEN) };
+    let private_key_w = unsafe { std::slice::from_raw_parts(private_key, GXT_KEY_LEN) };
+    x25519::curve25519_shared_secret(&mut shared_secret_w[0], private_key_w[0], public_key_w[0])
+}
+
+#[no_mangle]
+pub extern "C" fn curve25519_generate_private_key(
+    private_key: *mut [u8; GXT_KEY_LEN]
+) {
+    let private_key_w: &mut [[u8; GXT_KEY_LEN]] = unsafe { std::slice::from_raw_parts_mut(private_key, GXT_KEY_LEN) };
+    x25519::curve25519_generate_private_key(&mut private_key_w[0]);
+}
+
+#[no_mangle]
+pub extern "C" fn curve25519_derive_public_key(
+    public_key: *mut [u8; GXT_KEY_LEN],
+    private_key: *const [u8; GXT_KEY_LEN],
+) -> bool {
+    let public_key_w: &mut [[u8; GXT_KEY_LEN]] = unsafe { std::slice::from_raw_parts_mut(public_key, GXT_KEY_LEN) };
+    let private_key_w = unsafe { std::slice::from_raw_parts(private_key, GXT_KEY_LEN) };
+    x25519::curve25519_derive_public_key(&mut public_key_w[0], private_key_w[0])
+}
 
 #[no_mangle]
 pub extern "C" fn key_from_base64(
