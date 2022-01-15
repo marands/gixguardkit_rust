@@ -6,7 +6,7 @@ edition = "2021"
 
 [lib]
 name="gix_guard_kit"
-crate-type = ["staticlib", "cdylib" ]
+crate-type = ["staticlib"]
 #crate-type = ["cdylib"]
 # cargo-features = ["strip"]
 path = "src/lib.rs"
@@ -44,8 +44,11 @@ cbindgen = { git = "https://github.com/mjhatamy/cbindgen", branch = "ref_fix" }
 [dev-dependencies]
 pretty_assertions = "1"
 
-#[target.aarch64-apple-darwin]
-#crate-type = [ "framework" ]
+# [target.x86_64-apple-ios]
+# crate-type = [ "staticlib" ]
+
+# [target.aarch64-apple-ios]
+# crate-type = [ "staticlib" ]
 #
 #[target.x86_64-apple-darwin]
 #crate-type = [ "framework" ]
