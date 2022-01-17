@@ -34,9 +34,12 @@ codegen-units = 16
 #cbindgen = "0.20.0"
 #libc = "0.2.112"
 rand = "0.8.4"
+uniffi_macros = { version = "0.16.0" }
+uniffi = { version = "0.16.0", features=["builtin-bindgen"]}
 
 [build-dependencies]
-cbindgen = { git = "https://github.com/mjhatamy/cbindgen", branch = "ref_fix" }
+uniffi_build = {version = "0.16.0", features = [ "builtin-bindgen" ]}
+#cbindgen = { git = "https://github.com/mjhatamy/cbindgen", branch = "ref_fix" }
 #cbindgen = { version = "0.20.0", path = "../../../../mjhatamy/git_contrib_projects/cbindgen"}
 #cbindgen = "0.20.0"
 
