@@ -1,4 +1,4 @@
-use crate::utils::keys_utils::key_from_hex;
+use crate::utils::keys_utils::{key_from_base64, key_from_hex};
 
 pub mod errors;
 pub mod utils;
@@ -6,8 +6,8 @@ pub mod utils;
 pub use errors::GixTunnelErrorKind;
 // use std::os::raw::c_char;
 //
-// use self::utils::keys_utils;
-// use self::utils::constants::{GXT_KEY_LEN, GXT_KEY_LEN_BASE64, GXT_KEY_LEN_HEX};
+use self::utils::keys_utils;
+use self::utils::constants::{GXT_KEY_LEN, GXT_KEY_LEN_BASE64, GXT_KEY_LEN_HEX};
 // use self::utils::x25519;
 
 // #[no_mangle]
@@ -142,12 +142,34 @@ pub struct PrivateKey {
 }
 
 impl PrivateKey {
-    fn new(hex_key: Vec<u8>) -> Result<Self, GixTunnelErrorKind> {
+    pub fn new(key: Vec<u8>) -> Result<Self, GixTunnelErrorKind> {
+        match key {
+            key if key.len() == GXT_KEY_LEN => Ok(
+                PrivateKey {
+                    key
+                }
+            ),
+            key if key.len() != GXT_KEY_LEN => Err(GixTunnelErrorKind::InvalidInputLength),
+            _ => Err(GixTunnelErrorKind::Failed)
+        }
+
+    }
+    pub fn from_hex_key(hex_key: Vec<u8>) -> Result<Self, GixTunnelErrorKind> {
         match key_from_hex(Some(hex_key)) {
+            Ok(key) => Ok(
+                PrivateKey {
+                    key
+                }
+            ),
+            Err(e) => Err(e)
+        }
+    }
+
+    pub fn from_base64_str(base64_str: String) -> Result<Self, GixTunnelErrorKind> {
+        match key_from_base64(Some(base64_str)) {
             Ok(x) => Ok(
                 PrivateKey {
                     key: x
-                    //items: RwLock::<Vec::new())
                 }
             ),
             Err(e) => Err(e)
