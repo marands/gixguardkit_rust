@@ -388,3 +388,6 @@ mod tests {
         }
     }
 }
+
+
+//include!(concat!(env!("OUT_DIR"), "/gix_guard.uniffi.rs"));

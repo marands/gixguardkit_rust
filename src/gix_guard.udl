@@ -1,3 +1,18 @@
 namespace gix_guard {
   u32 add(u32 a, u32 b);
 };
+
+
+[Error]
+enum GixTunnelErrorKind {
+  "Ok",
+  "Failed",
+  "NullInput",
+  "InvalidInput",
+  "InvalidInputLength"
+};
+
+interface PrivateKey {
+    [Throws=GixTunnelErrorKind]
+    constructor(sequence<u8> hex_key);
+};

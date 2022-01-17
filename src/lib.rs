@@ -1,7 +1,9 @@
+use crate::utils::keys_utils::key_from_hex;
+
 pub mod errors;
 pub mod utils;
 
-// pub use errors::GixTunnelErrorKind;
+pub use errors::GixTunnelErrorKind;
 // use std::os::raw::c_char;
 //
 // use self::utils::keys_utils;
@@ -133,6 +135,27 @@ pub mod utils;
 //     let rvar: &[u8] = unsafe { std::slice::from_raw_parts(r_val.cast(), GXT_KEY_LEN) };
 //     keys_utils::key_eq(Some(&lvar.to_vec()), Some(&rvar.to_vec()))
 // }
+
+#[allow(unused)]
+pub struct PrivateKey {
+    key: Vec<u8>
+}
+
+impl PrivateKey {
+    fn new(hex_key: Vec<u8>) -> Result<Self, GixTunnelErrorKind> {
+        match key_from_hex(Some(hex_key)) {
+            Ok(x) => Ok(
+                PrivateKey {
+                    key: x
+                    //items: RwLock::<Vec::new())
+                }
+            ),
+            Err(e) => Err(e)
+        }
+    }
+}
+
+
 
 pub fn add(a: u32, b: u32) -> u32 {
     a + b
