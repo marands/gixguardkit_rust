@@ -6,8 +6,8 @@ pub mod utils;
 pub use errors::GixTunnelErrorKind;
 // use std::os::raw::c_char;
 //
-use self::utils::keys_utils;
-use self::utils::constants::{GXT_KEY_LEN, GXT_KEY_LEN_BASE64, GXT_KEY_LEN_HEX};
+//use self::utils::keys_utils;
+use self::utils::constants::{GXT_KEY_LEN};//, GXT_KEY_LEN_BASE64, GXT_KEY_LEN_HEX};
 // use self::utils::x25519;
 
 // #[no_mangle]
