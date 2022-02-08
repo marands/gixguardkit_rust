@@ -1,182 +1,113 @@
-use crate::utils::keys_utils::{key_from_base64, key_from_hex};
-
+use std::sync::Arc;
+use crate::utils::keys_utils::{key_eq, key_to_base64, key_from_base64, key_from_hex, key_to_hex};
+use crate::utils::x25519::{ curve25519_derive_public_key };
 pub mod errors;
 pub mod utils;
-
+use rand::*;
 pub use errors::GixTunnelErrorKind;
-// use std::os::raw::c_char;
-//
-//use self::utils::keys_utils;
-use self::utils::constants::{GXT_KEY_LEN};//, GXT_KEY_LEN_BASE64, GXT_KEY_LEN_HEX};
-// use self::utils::x25519;
+use self::utils::constants::{GXT_KEY_LEN, GXT_KEY_LEN_HEX};//, GXT_KEY_LEN_BASE64, GXT_KEY_LEN_HEX};
 
-// #[no_mangle]
-// pub extern "C" fn curve25519_shared_secret(
-//     shared_secret: *mut [u8; GXT_KEY_LEN],
-//     private_key: *const [u8; GXT_KEY_LEN],
-//     public_key: *const [u8; GXT_KEY_LEN],
-// ) {
-//     let shared_secret_w: &mut [[u8; GXT_KEY_LEN]] = unsafe { std::slice::from_raw_parts_mut(shared_secret, GXT_KEY_LEN) };
-//     let public_key_w = unsafe { std::slice::from_raw_parts(public_key, GXT_KEY_LEN) };
-//     let private_key_w = unsafe { std::slice::from_raw_parts(private_key, GXT_KEY_LEN) };
-//     x25519::curve25519_shared_secret(&mut shared_secret_w[0], private_key_w[0], public_key_w[0])
-// }
-//
-// #[no_mangle]
-// pub extern "C" fn curve25519_generate_private_key(
-//     private_key: *mut [u8; GXT_KEY_LEN]
-// ) {
-//     let private_key_w: &mut [[u8; GXT_KEY_LEN]] = unsafe { std::slice::from_raw_parts_mut(private_key, GXT_KEY_LEN) };
-//     x25519::curve25519_generate_private_key(&mut private_key_w[0]);
-// }
-//
-// #[no_mangle]
-// pub extern "C" fn curve25519_derive_public_key(
-//     public_key: *mut [u8; GXT_KEY_LEN],
-//     private_key: *const [u8; GXT_KEY_LEN],
-// ) -> bool {
-//     let public_key_w: &mut [[u8; GXT_KEY_LEN]] = unsafe { std::slice::from_raw_parts_mut(public_key, GXT_KEY_LEN) };
-//     let private_key_w = unsafe { std::slice::from_raw_parts(private_key, GXT_KEY_LEN) };
-//     x25519::curve25519_derive_public_key(&mut public_key_w[0], private_key_w[0])
-// }
-//
-// #[no_mangle]
-// pub extern "C" fn key_from_base64(
-//     dst: *mut [u8; GXT_KEY_LEN],
-//     src: *const [c_char; GXT_KEY_LEN_BASE64],
-// ) -> GixTunnelErrorKind {
-//     // remove C null terminated here from string ==> (GXT_KEY_LEN_BASE64 - 1)
-//     let base64_array: Vec<u8> =
-//         unsafe { std::slice::from_raw_parts(src.cast(), GXT_KEY_LEN_BASE64 - 1) }.to_vec();
-//     let base64_string = match String::from_utf8(base64_array) {
-//         Ok(x) => x,
-//         Err(e) => {
-//             print!("Failed to case input base64 to rust String. {:?}", e);
-//             return GixTunnelErrorKind::InvalidInput;
-//         }
-//     };
-//     let key: &mut [u8] = unsafe { std::slice::from_raw_parts_mut(dst.cast(), GXT_KEY_LEN) };
-//     let res = keys_utils::key_from_base64(Some(base64_string));
-//     match res {
-//         Ok(out_vec) => {
-//             for (index, item) in out_vec.iter().enumerate() {
-//                 key[index] = *item;
-//             }
-//             GixTunnelErrorKind::Ok
-//         }
-//         Err(e) => e,
-//     }
-// }
-//
-// #[no_mangle]
-// pub extern "C" fn key_to_base64(
-//     dst: *mut [c_char; GXT_KEY_LEN_BASE64],
-//     src: *const [u8; GXT_KEY_LEN],
-// ) -> GixTunnelErrorKind {
-//     let base64_array: &mut [u8] =
-//         unsafe { std::slice::from_raw_parts_mut(dst.cast(), GXT_KEY_LEN_BASE64) };
-//     let key: &[u8] = unsafe { std::slice::from_raw_parts(src.cast(), GXT_KEY_LEN) };
-//     let res = keys_utils::key_to_base64(Some(key.to_vec().as_ref()));
-//     match res {
-//         Ok(out_vec) => {
-//             for (index, item) in out_vec.as_bytes().iter().enumerate() {
-//                 base64_array[index] = *item;
-//             }
-//             base64_array[GXT_KEY_LEN_BASE64 - 1] = 0;
-//             GixTunnelErrorKind::Ok
-//         }
-//         Err(e) => e,
-//     }
-// }
-//
-// #[no_mangle]
-// pub extern "C" fn key_from_hex(
-//     dst: *mut [u8; GXT_KEY_LEN],
-//     src: *const [c_char; GXT_KEY_LEN_HEX],
-// ) -> GixTunnelErrorKind {
-//     let key: &mut [u8] = unsafe { std::slice::from_raw_parts_mut(dst.cast(), GXT_KEY_LEN) };
-//     // C strings are null terminated, so we will remove last byte
-//     let hex_key_str: &[u8] = unsafe { std::slice::from_raw_parts(src.cast(), GXT_KEY_LEN_HEX - 1) };
-//     let res = keys_utils::key_from_hex(Some(hex_key_str.to_vec()));
-//     match res {
-//         Ok(out_vec) => {
-//             for (index, item) in out_vec.iter().enumerate() {
-//                 key[index] = *item;
-//             }
-//             //            key[GXT_KEY_LEN - 1] = 0;
-//             GixTunnelErrorKind::Ok
-//         }
-//         Err(e) => e,
-//     }
-// }
-//
-// #[no_mangle]
-// pub extern "C" fn key_to_hex(
-//     dst: *mut [c_char; GXT_KEY_LEN_HEX],
-//     src: &[u8; GXT_KEY_LEN],
-// ) -> GixTunnelErrorKind {
-//     let hex: &mut [u8] = unsafe { std::slice::from_raw_parts_mut(dst.cast(), GXT_KEY_LEN_HEX) };
-//     let res = keys_utils::key_to_hex(Some(&src.to_vec()));
-//     match res {
-//         Ok(out_vec) => {
-//             for (index, item) in out_vec.iter().enumerate() {
-//                 hex[index] = *item;
-//             }
-//             hex[GXT_KEY_LEN_HEX - 1] = 0;
-//             GixTunnelErrorKind::Ok
-//         }
-//         Err(e) => e,
-//     }
-// }
-//
-// #[no_mangle]
-// pub extern "C" fn key_eq(l_val: *const [u8; GXT_KEY_LEN], r_val: *const [u8; GXT_KEY_LEN]) -> bool {
-//     let lvar: &[u8] = unsafe { std::slice::from_raw_parts(l_val.cast(), GXT_KEY_LEN) };
-//     let rvar: &[u8] = unsafe { std::slice::from_raw_parts(r_val.cast(), GXT_KEY_LEN) };
-//     keys_utils::key_eq(Some(&lvar.to_vec()), Some(&rvar.to_vec()))
-// }
+pub trait BaseKey {
+    fn new(raw_value: Vec<u8>) -> Result<Self, GixTunnelErrorKind> where Self: Sized;
+    fn raw_value(&self) -> Vec<u8>;
+
+    fn is_eq(&self, other: &Self) -> bool {
+        key_eq(Some(&self.raw_value()), Some(&other.raw_value()))
+    }
+    fn from_hex_key<T: BaseKey>(hex_key: String) -> Result<T, GixTunnelErrorKind> {
+        match key_from_hex(Some(hex_key.as_bytes().to_vec())) {
+            Ok(raw_value) => T::new(raw_value),
+            Err(e) => Err(e)
+        }
+    }
+
+    fn from_base64_str<T: BaseKey>(base64_key: String) -> Result<T, GixTunnelErrorKind> {
+        match key_from_base64(Some(base64_key)) {
+            Ok(raw_value) => T::new(raw_value),
+            Err(e) => Err(e)
+        }
+    }
+
+    /// Instance of baseKey is always valid, so, we expect it to return correct value.
+    fn base64_key(&self) -> String {
+        key_to_base64(Some(&self.raw_value())).unwrap_or("".to_string())
+    }
+
+    /// Instance of baseKey is always valid, so, we expect it to return correct value.
+    fn hex_key(&self) -> String {
+        String::from_utf8(key_to_hex(Some(&self.raw_value())).unwrap_or(vec![])).unwrap_or("".to_string())
+    }
+
+    fn mock<T: BaseKey>() -> T {
+        let mut rng = rand::thread_rng();
+        let rand_vals = (0..(GXT_KEY_LEN_HEX - 1)).map(|_|rng.gen_range(0..255)).collect::<Vec<u8>>();
+        T::new(rand_vals).unwrap()
+    }
+    
+}
 
 #[allow(unused)]
 pub struct PrivateKey {
-    key: Vec<u8>
+    raw_value: Vec<u8>
 }
 
 impl PrivateKey {
-    pub fn new(key: Vec<u8>) -> Result<Self, GixTunnelErrorKind> {
-        match key {
-            key if key.len() == GXT_KEY_LEN => Ok(
-                PrivateKey {
-                    key
-                }
-            ),
-            key if key.len() != GXT_KEY_LEN => Err(GixTunnelErrorKind::InvalidInputLength),
-            _ => Err(GixTunnelErrorKind::Failed)
-        }
-
-    }
-    pub fn from_hex_key(hex_key: Vec<u8>) -> Result<Self, GixTunnelErrorKind> {
-        match key_from_hex(Some(hex_key)) {
-            Ok(key) => Ok(
-                PrivateKey {
-                    key
-                }
-            ),
-            Err(e) => Err(e)
-        }
-    }
-
-    pub fn from_base64_str(base64_str: String) -> Result<Self, GixTunnelErrorKind> {
-        match key_from_base64(Some(base64_str)) {
-            Ok(x) => Ok(
-                PrivateKey {
-                    key: x
-                }
-            ),
-            Err(e) => Err(e)
-        }
+    pub fn public_key(self: Arc<Self>) -> Arc<PublicKey> {
+        let  mut public_key:[u8; GXT_KEY_LEN] = [0; GXT_KEY_LEN];
+        let mut private_key: [u8; GXT_KEY_LEN] = [0; GXT_KEY_LEN];
+        self.raw_value.iter().enumerate().for_each(|(i,c) | {
+            private_key[i] = *c;
+        });
+        curve25519_derive_public_key(&mut public_key, &private_key);
+        Arc::new(PublicKey {
+            raw_value: public_key.to_vec()
+        })
     }
 }
 
+impl BaseKey for PrivateKey {
+    fn new(raw_value: Vec<u8>) -> Result<PrivateKey, GixTunnelErrorKind> {
+        Ok(PrivateKey{
+            raw_value: raw_value.clone()
+        })
+    }
+
+    fn raw_value(&self) -> Vec<u8> {
+        self.raw_value.clone()
+    }
+}
+
+pub struct PublicKey {
+    raw_value: Vec<u8>
+}
+
+impl BaseKey for PublicKey {
+    fn new(raw_value: Vec<u8>) -> Result<PublicKey, GixTunnelErrorKind> {
+        Ok(PublicKey {
+            raw_value: raw_value.clone()
+        })
+    }
+
+    fn raw_value(&self) -> Vec<u8> {
+        self.raw_value.clone()
+    }
+}
+
+pub struct PreSharedKey {
+    raw_value: Vec<u8>
+}
+
+impl BaseKey for PreSharedKey {
+    fn new(raw_value: Vec<u8>) -> Result<PreSharedKey, GixTunnelErrorKind> {
+        Ok(PreSharedKey {
+            raw_value: raw_value.clone()
+        })
+    }
+
+    fn raw_value(&self) -> Vec<u8> {
+        self.raw_value.clone()
+    }
+}
 
 
 pub fn add(a: u32, b: u32) -> u32 {

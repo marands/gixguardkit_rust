@@ -138,32 +138,3 @@ create_fat_file() {
 
 eval_for_platform "$PLATFORM_NAME"
 create_fat_file "${LIPO_ARCHS[@]}"
-
-#for i in "${!LIBS_ARCHS[@]}"; do
-#    env -i PATH="${PATH}" \
-#    "${HOME}"/.cargo/bin/cargo build --locked -p "${FFI_TARGET}" --lib ${RELFLAG} --target "${IOS_TRIPLES[${i}]}"
-#done
-
-#UNIVERSAL_BINARY_DIR=${TARGETDIR}/universal/${RELDIR}/${STATIC_LIB_NAME}
-#NEED_LIPO=
-#
-## if the universal binary doesnt exist, or if it's older than the static libs,
-## we need to run `lipo` again.
-#for architecture in "${IOS_TRIPLES[@]}"; do
-#    echo "architecture: $architecture"
-#done
-#
-#if [[ ! -f "${UNIVERSAL_BINARY_DIR}" ]]; then
-#    NEED_LIPO=1
-#elif [[ "$(stat -f "%m" "${TARGETDIR}/x86_64-apple-ios/${RELDIR}/${STATIC_LIB_NAME}")" -gt "$(stat -f "%m" "${UNIVERSAL_BINARY_DIR}")" ]]; then
-#    NEED_LIPO=1
-#elif [[ "$(stat -f "%m" "${TARGETDIR}/aarch64-apple-ios/${RELDIR}/${STATIC_LIB_NAME}")" -gt "$(stat -f "%m" "${UNIVERSAL_BINARY_DIR}")" ]]; then
-#    NEED_LIPO=1
-#fi
-#
-#if [[ "${NEED_LIPO}" = "1" ]]; then
-#    mkdir -p "${TARGETDIR}/universal/${RELDIR}"
-#    lipo -create -output "${UNIVERSAL_BINARY_DIR}" \
-#        "${TARGETDIR}/x86_64-apple-ios/${RELDIR}/${STATIC_LIB_NAME}" \
-#        "${TARGETDIR}/aarch64-apple-ios/${RELDIR}/${STATIC_LIB_NAME}"
-#fi

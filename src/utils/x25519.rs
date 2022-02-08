@@ -112,10 +112,10 @@ fn invert(o: &mut Fe, i: Fe) {
     o.copy_from_slice(&c[0..16]);
 }
 
-pub fn curve25519_shared_secret(
+pub(crate) fn curve25519_shared_secret(
     shared_secret: &mut [u8; GXT_KEY_LEN],
-    private_key: [u8; GXT_KEY_LEN],
-    public_key: [u8; GXT_KEY_LEN],
+    private_key: &[u8; GXT_KEY_LEN],
+    public_key: &[u8; GXT_KEY_LEN],
 ) {
     let a24: Fe = [0xdb41, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     let mut r: i64;
@@ -126,7 +126,7 @@ pub fn curve25519_shared_secret(
     let mut d: Fe = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     let mut e: Fe = [0; 16];
     let mut f: Fe = [0; 16];
-    unpack(&mut x, &public_key);
+    unpack(&mut x, public_key);
     b.clone_from_slice(&x[..16]);
 
     let mut tmp: Fe = [0; 16];
@@ -187,7 +187,7 @@ pub fn curve25519_shared_secret(
 }
 
 #[allow(unused)]
-pub fn curve25519_generate_private_key(private_key: &mut [u8; GXT_KEY_LEN]) {
+pub(crate) fn curve25519_generate_private_key(private_key: &mut [u8; GXT_KEY_LEN]) {
     for index in 0..GXT_KEY_LEN {
         private_key[index] = rand::random::<u8>();
     }
@@ -196,10 +196,9 @@ pub fn curve25519_generate_private_key(private_key: &mut [u8; GXT_KEY_LEN]) {
 }
 
 #[allow(unused)]
-pub fn curve25519_derive_public_key(public_key: &mut [u8; GXT_KEY_LEN], private_key: [u8; GXT_KEY_LEN]) -> bool {
-    let basepoint: [u8; 32] = [ 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
-    curve25519_shared_secret(public_key, private_key, basepoint);
-    true
+pub(crate) fn curve25519_derive_public_key(public_key: &mut [u8; GXT_KEY_LEN], private_key: &[u8; GXT_KEY_LEN]) {
+    let base_point: [u8; GXT_KEY_LEN] = [ 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+    curve25519_shared_secret(public_key, private_key, &base_point)
 }
 
 #[cfg(test)]
@@ -297,8 +296,8 @@ public_key_calc_arr: [
         for index in 0..16 {
             super::curve25519_shared_secret(
                 &mut shared_secret_res,
-                keys_item.private_key_arr[index],
-                keys_item.public_key_arr[index],
+                &keys_item.private_key_arr[index],
+                &keys_item.public_key_arr[index],
             );
             assert_eq!(keys_item.shared_secret_arr[index], shared_secret_res);
         }
@@ -309,7 +308,7 @@ public_key_calc_arr: [
         let keys_item = get_keys();
         let mut public_key: [u8; 32] = [0; 32];
         for i in 0..16 {
-            super::curve25519_derive_public_key(&mut public_key, keys_item.private_key_arr[i]);
+            super::curve25519_derive_public_key(&mut public_key, &keys_item.private_key_arr[i]);
             //print!("public_key: {:x?}\n", public_key);
             assert_eq!(keys_item.public_key_calc_arr[i], public_key);
         }
