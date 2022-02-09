@@ -25,7 +25,6 @@ interface PrivateKey {
     [Name=mock]
     constructor();
 
-    [Self=ByArc]
     PublicKey public_key();
 
     sequence<u8> raw_value();

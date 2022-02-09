@@ -205,12 +205,14 @@ eval_for_platform "macosx" "debug"
 eval_for_platform "macosx" "release"
 
 
+$HOME/.cargo/bin/uniffi-bindgen generate src/gix_guard.udl --language swift --out-dir "${TARGETDIR}/universal/headers"
+
 XC_LIB_LIB_STR=""
 for XC_LIB in "${XC_FRAMEWORK_LIBS_debug[@]}"; do
     if [ "XC_LIB" = "" ]; then
       continue
     fi
-    XC_LIB_LIB_STR="$XC_LIB_LIB_STR -library $XC_LIB"
+    XC_LIB_LIB_STR="$XC_LIB_LIB_STR -library $XC_LIB -headers ${TARGETDIR}/universal/headers"
 done
 
 xcodebuild -create-xcframework $XC_LIB_LIB_STR \
@@ -222,7 +224,7 @@ for XC_LIB in "${XC_FRAMEWORK_LIBS[@]}"; do
     if [ "XC_LIB" = "" ]; then
       continue
     fi
-    XC_LIB_LIB_STR="$XC_LIB_LIB_STR -library $XC_LIB"
+    XC_LIB_LIB_STR="$XC_LIB_LIB_STR -library $XC_LIB -headers ${TARGETDIR}/universal/headers"
 done
 
 xcodebuild -create-xcframework $XC_LIB_LIB_STR \

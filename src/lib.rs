@@ -5,7 +5,7 @@ pub mod errors;
 pub mod utils;
 use rand::*;
 pub use errors::GixTunnelErrorKind;
-use self::utils::constants::{GXT_KEY_LEN, GXT_KEY_LEN_HEX};//, GXT_KEY_LEN_BASE64, GXT_KEY_LEN_HEX};
+use self::utils::constants::{GXT_KEY_LEN};//, GXT_KEY_LEN_BASE64, GXT_KEY_LEN_HEX};
 
 pub trait BaseKey {
     fn new(raw_value: Vec<u8>) -> Result<Self, GixTunnelErrorKind> where Self: Sized;
@@ -40,7 +40,7 @@ pub trait BaseKey {
 
     fn mock<T: BaseKey>() -> T {
         let mut rng = rand::thread_rng();
-        let rand_vals = (0..(GXT_KEY_LEN_HEX - 1)).map(|_|rng.gen_range(0..255)).collect::<Vec<u8>>();
+        let rand_vals = (0..(GXT_KEY_LEN)).map(|_|rng.gen_range(0..255)).collect::<Vec<u8>>();
         T::new(rand_vals).unwrap()
     }
     
@@ -52,7 +52,7 @@ pub struct PrivateKey {
 }
 
 impl PrivateKey {
-    pub fn public_key(self: Arc<Self>) -> Arc<PublicKey> {
+    pub fn public_key(&self) -> Arc<PublicKey> {
         let  mut public_key:[u8; GXT_KEY_LEN] = [0; GXT_KEY_LEN];
         let mut private_key: [u8; GXT_KEY_LEN] = [0; GXT_KEY_LEN];
         self.raw_value.iter().enumerate().for_each(|(i,c) | {
@@ -117,8 +117,13 @@ pub fn add(a: u32, b: u32) -> u32 {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     #[test]
-    fn test_key_to_hex() {}
+    fn private_key_test() {
+        let p_key: PrivateKey = PrivateKey::mock();
+        println!("pub key: {:?}", p_key.public_key().raw_value)
+
+    }
 }
 
 include!(concat!(env!("OUT_DIR"), "/gix_guard.uniffi.rs"));
